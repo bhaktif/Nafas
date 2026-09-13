@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nafas</title>
+<meta property="og:title" content="Nafas">
+<meta property="og:description" content="Web app sederhana untuk latihan nafas pelan.">
+<meta property="og:image" content="/og-nafas.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nafas">
+<meta name="twitter:image" content="/og-nafas.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -79,8 +86,10 @@
     border:none;
     background:#ffffff;
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
+    gap:6px;
     font-size:16px;
     font-weight:500;
     color:#8a8a92;
@@ -90,6 +99,13 @@
   .circle.inhale { transform: scale(1.6); transition-duration:4s; }
   .circle.hold { transform: scale(1.6); transition-duration:0.2s; }
   .circle.exhale { transform: scale(1); transition-duration:6s; }
+  .circle.idle {
+    animation: pulse 3.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); box-shadow:0 0 0 0 rgba(0,0,0,0.04); }
+    50% { transform: scale(1.05); box-shadow:0 0 0 14px rgba(0,0,0,0); }
+  }
   .dot-wrap {
     display:inline-block;
   }
@@ -107,8 +123,8 @@
     100% { opacity:0; }
   }
   .counter {
-    margin-top:90px;
-    font-size:13px;
+    margin-top:0;
+    font-size:12px;
     color:#a8a8ae;
     font-weight:500;
   }
@@ -187,8 +203,10 @@
   </div>
 
   <div class="center">
-    <div class="circle" id="circle"><span id="circleText">Mulai</span></div>
-    <div class="counter" id="counter"></div>
+    <div class="circle idle" id="circle">
+      <span id="circleText">Mulai</span>
+      <div class="counter" id="counter"></div>
+    </div>
   </div>
 
   <div class="dropdown" id="dropdown">
@@ -280,7 +298,7 @@ function stop() {
   running = false;
   clearTimeout(timer);
   clearInterval(countInterval);
-  circle.className = 'circle';
+  circle.className = 'circle idle';
   circleText.innerHTML = 'Mulai';
   counter.textContent = '';
 }
@@ -290,7 +308,10 @@ circle.addEventListener('click', () => {
   if (running) {
     phases = patternMap[selectedPattern];
     phaseIndex = 0;
-    runPhase();
+    circle.className = 'circle'; // stop pulse, reset to scale(1) baseline
+    requestAnimationFrame(() => {
+      requestAnimationFrame(runPhase); // wait a frame so transition starts cleanly
+    });
   } else {
     stop();
   }
